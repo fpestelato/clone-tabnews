@@ -21,7 +21,7 @@ async function getNewClient() {
     database: process.env.POSTGRES_DB,
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
-    ssl: !process.env.NODE_ENV === "development",
+    ssl: process.env.NODE_ENV === "production",
   });
 
   await client.connect();
