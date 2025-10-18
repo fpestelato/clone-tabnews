@@ -8,7 +8,9 @@ async function status(request, response) {
   const allowedMethods = ["GET", "POST"];
 
   if (!allowedMethods.includes(method)) {
-    return response.status(405).end();
+    return response.status(405).json({
+      error: `Method ${method} not allowed.`,
+    });
   }
 
   let dbClient;
