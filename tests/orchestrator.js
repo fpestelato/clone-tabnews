@@ -1,3 +1,4 @@
+import database from "infra/database";
 import retry from "async-retry";
 
 async function waitForAllServices() {
@@ -17,8 +18,12 @@ async function waitForAllServices() {
   }
 }
 
+async function cleanDatabase() {
+  database.query("drop schema if exists public cascade; create schema public;");
+}
 const orchestrator = {
   waitForAllServices,
+  cleanDatabase,
 };
 
 export default orchestrator;
