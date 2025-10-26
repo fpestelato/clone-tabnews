@@ -19,7 +19,7 @@ async function status(request, response) {
     dbClient = await database.getNewClient();
     const defaultMigrationOptions = {
       dbClient,
-      dir: path.join("infra", "migrations"),
+      dir: path.resolve("infra", "migrations"),
       migrationsTable: "pgmigrations",
       direction: "up",
       verbose: true,
