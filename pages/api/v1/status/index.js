@@ -16,7 +16,8 @@ async function status(request, response) {
       values: [dbName],
     });
 
-    const { version, max_connections, opened_connections } = result.rows[0] || {};
+    const { version, max_connections, opened_connections } =
+      result.rows[0] || {};
 
     response.status(200).json({
       updated_at: updatedAt,
@@ -31,7 +32,7 @@ async function status(request, response) {
   } catch (error) {
     const publicInternalError = new InternalServerError({ cause: error });
     console.error(publicInternalError);
-    response.status(publicInternalError.statusCode).json(publicInternalError)
+    response.status(publicInternalError.statusCode).json(publicInternalError);
   }
 }
 
