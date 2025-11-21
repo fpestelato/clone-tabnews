@@ -40,7 +40,6 @@ export class ServiceError extends Error {
   }
 }
 
-
 export class MethodNotAllowed extends Error {
   constructor() {
     super("Método não permitido para este endpoint");

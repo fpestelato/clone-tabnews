@@ -1,52 +1,58 @@
+import { createRouter } from "next-connect";
 import migrationRunner from "node-pg-migrate";
 import path from "path";
 import database from "infra/database";
+import controller from "infra/controller";
 
-async function status(request, response) {
-  const { method } = request;
+const routes = createRouter();
 
-  const allowedMethods = ["GET", "POST"];
+routes.get(getHandler);
+routes.post(postHandler);
 
-  if (!allowedMethods.includes(method)) {
-    return response.status(405).json({
-      error: `Method ${method} not allowed.`,
-    });
-  }
+export default routes.handler(controller.errorHandlers);
 
+async function getHandler(request, response) {
   let dbClient;
 
   try {
     dbClient = await database.getNewClient();
-    const defaultMigrationOptions = {
-      dbClient,
-      dir: path.resolve("infra", "migrations"),
-      migrationsTable: "pgmigrations",
-      direction: "up",
-      verbose: true,
-    };
 
-    if (method === "GET") {
-      const pendingMigrations = await migrationRunner({
-        ...defaultMigrationOptions,
-        dryRun: true,
-      });
-      return response.status(200).json(pendingMigrations);
-    }
+    const pendingMigrations = await migrationRunner({
+      ...getDefaultMigrationOptions(dbClient),
+      dryRun: true,
+    });
 
-    if (method === "POST") {
-      const migratedMigrations = await migrationRunner(defaultMigrationOptions);
-
-      if (migratedMigrations.length) {
-        return response.status(201).json(migratedMigrations);
-      }
-
-      return response.status(200).json(migratedMigrations);
-    }
-  } catch (error) {
-    console.log(error);
+    return response.status(200).json(pendingMigrations);
   } finally {
-    dbClient.end();
+    dbClient?.end();
   }
 }
 
-export default status;
+async function postHandler(request, response) {
+  let dbClient;
+
+  try {
+    dbClient = await database.getNewClient();
+    const migratedMigrations = await migrationRunner(
+      getDefaultMigrationOptions(dbClient),
+    );
+
+    if (migratedMigrations.length) {
+      return response.status(201).json(migratedMigrations);
+    }
+
+    return response.status(200).json(migratedMigrations);
+  } finally {
+    dbClient?.end();
+  }
+}
+
+function getDefaultMigrationOptions(dbClient) {
+  return {
+    dbClient,
+    dir: path.resolve("infra", "migrations"),
+    migrationsTable: "pgmigrations",
+    direction: "up",
+    verbose: true,
+  };
+}
